@@ -6,6 +6,8 @@ Everything is under **Social Images** in the control panel's sidebar: **Template
 
 Every template, with a preview and how many settings rules use it. Designer templates are previewed with sample text, code templates with a recent entry that uses them. **Create template** starts one from a starter or blank; **Import** adds one from JSON (see [Importing and exporting](importing.md)). Each designer template's **⋯** menu can edit, duplicate, export or delete it. [Code templates](code-templates.md) are listed too, marked **Code**; they're edited as files.
 
+![The Templates page: Editorial, made in the designer, and Book jacket, a code template](images/templates.png)
+
 Templates are kept in Project Config, so creating, importing, editing, duplicating and deleting them only work where admin changes are allowed. Elsewhere the page lists them, and exporting still works.
 
 Deleting a template that rules use leaves their entries with no image until you choose another.
@@ -17,6 +19,8 @@ See [The designer](designer.md).
 ## Images
 
 Every entry that has a template, in each of its sites, with each of its images and whether it's current. Search by title, or show one section.
+
+![The Images page, with each book's image](images/images.png)
 
 - An image that's out of date (its entry or template changed) shows the image still in use, faded, marked **Out of date**.
 - **Generate missing** (or **Update out of date**) makes the images that don't exist yet or are out of date.
@@ -34,6 +38,8 @@ The settings are saved to Project Config. Only admins can open them, and only wh
 ## In an entry
 
 Add a **Social image** field to an entry type's field layout (see [Installation](installation.md#first-steps)) and each entry shows:
+
+![A journal entry's Social image field, with SEOmatic's preview beside it](images/entry.png)
 
 - **The image**, as it is now. When it's missing or out of date (the entry or its template changed), opening the entry starts making it, and the field shows the previous image (if there is one) with where it's got to: **Waiting to start…** while it's queued, then **Rendering…** with a count of seconds. It swaps in the new image when it's ready, usually in a few seconds.
 - **Regenerate**, to remake it now (for instance after replacing an asset's file in place).

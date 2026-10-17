@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.1 - Unreleased
+
+### Fixed
+- SEOmatic's preview in the entry sidebar showed "No image set" for X and Facebook. It now shows the social image, as the page does.
+
+### Documentation
+- Screenshots of the designer, the Templates and Images pages and the Social image field.
+
 ## 1.0.0 - 2026-10-17
 
 ### Added

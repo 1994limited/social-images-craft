@@ -4,8 +4,9 @@ namespace nineteenninetyfour\socialimages\integrations;
 
 use Craft;
 use craft\elements\Entry;
+use craft\events\TemplateEvent;
+use craft\web\View;
 use nineteenninetyfour\socialimages\Plugin;
-use nystudio107\seomatic\events\AddDynamicMetaEvent;
 use nystudio107\seomatic\helpers\DynamicMeta;
 use nystudio107\seomatic\Seomatic as SeomaticPlugin;
 use Throwable;
@@ -36,13 +37,24 @@ class Seomatic
             return;
         }
 
-        Event::on(DynamicMeta::class, DynamicMeta::EVENT_ADD_DYNAMIC_META, function (AddDynamicMetaEvent $event) {
-            try {
-                self::apply();
-            } catch (Throwable $exception) {
-                Craft::warning('Social Images couldn’t set SEOmatic’s image: '.$exception->getMessage(), 'social-images');
+        Event::on(DynamicMeta::class, DynamicMeta::EVENT_ADD_DYNAMIC_META, fn () => self::safely());
+
+        // The entry sidebar's SEO preview loads SEOmatic's meta without its
+        // dynamic meta, so the image goes in just before it's drawn.
+        Event::on(View::class, View::EVENT_BEFORE_RENDER_TEMPLATE, function (TemplateEvent $event) {
+            if (str_starts_with($event->template, 'seomatic/_sidebars/') && str_ends_with($event->template, '-preview.twig')) {
+                self::safely();
             }
         });
+    }
+
+    protected static function safely(): void
+    {
+        try {
+            self::apply();
+        } catch (Throwable $exception) {
+            Craft::warning('Social Images couldn’t set SEOmatic’s image: '.$exception->getMessage(), 'social-images');
+        }
     }
 
     public static function apply(): void

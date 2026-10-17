@@ -2,6 +2,8 @@
 
 Share images for every entry, made for you. Design a card once in the control panel, bind it to your entries' titles, photos, authors and dates, and Social Images makes a 1200 × 630 image for each entry when it's saved. Your `og:image` and `twitter:image` point at it, so links to your site look like they were designed one by one.
 
+![Nine of the seventeen starter templates, each showing the same journal post](docs/images/gallery.png)
+
 It works with SEOmatic, or with no SEO plugin at all, on any Craft 5 site.
 
 ## Features
@@ -20,6 +22,12 @@ It works with SEOmatic, or with no SEO plugin at all, on any Craft 5 site.
 - **In bulk.** Make the missing images, or remake them all, from the control panel or with `php craft social-images/generate`. Rate limits are waited out.
 - **Per section, per entry.** Choose a template for each section (and site), let an entry choose another, or choose an image for an entry to use instead.
 - **No Chrome needed on your server.** Images are rendered with Browsershot (Chrome on your server) or Cloudflare Browser Rendering (no Chrome at all), or a renderer of your own. `php craft social-images/doctor` checks it works.
+
+| The designer | Every entry's image | In the entry |
+| --- | --- | --- |
+| ![The designer, editing the Editorial template with a real entry](docs/images/designer.png) | ![The Images page, listing each entry's images](docs/images/images.png) | ![The Social image field on a journal entry, with SEOmatic's preview beside it](docs/images/entry.png) |
+
+The screenshots are from Dog-ear Books, a made-up bookshop. See [the demo](docs/demo.md).
 
 ## Requirements
 

@@ -2,6 +2,8 @@
 
 Open a template from **Social Images → Templates**. Layers are on the left, the canvas in the middle, and the selected layer's settings on the right. Select nothing (click the canvas's surroundings, or **Background**) to change the layout's background.
 
+![The designer, editing the Editorial template with a journal post](images/designer.png)
+
 The canvas is drawn by the same code that draws the real image, so what you see is what's made. To be sure, **Render** takes a real screenshot through your [renderer](rendering.md) and shows it.
 
 On a narrower screen the canvas goes on top, with the layers and settings beneath it.

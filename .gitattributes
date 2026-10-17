@@ -10,3 +10,4 @@
 /pint.json export-ignore
 
 * text=auto
+/docs/images export-ignore
