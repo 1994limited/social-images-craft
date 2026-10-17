@@ -1,0 +1,61 @@
+{
+    "name": "1994/social-images-craft",
+    "description": "Social share images for Craft CMS: design Open Graph cards in the control panel, bind them to your entries' fields, and have them generated on save. Templates import and export as JSON.",
+    "type": "craft-plugin",
+    "license": "proprietary",
+    "keywords": ["craft", "cms", "craftcms", "craft-plugin", "open graph", "og image", "social image", "share image", "seo"],
+    "authors": [
+        {
+            "name": "1994",
+            "email": "hello@1994.co.uk",
+            "homepage": "https://1994.co.uk"
+        }
+    ],
+    "support": {
+        "email": "hello@1994.co.uk",
+        "docs": "https://github.com/1994limited/social-images-craft/blob/main/docs/README.md",
+        "issues": "https://github.com/1994limited/social-images-craft/issues",
+        "source": "https://github.com/1994limited/social-images-craft"
+    },
+    "require": {
+        "php": "^8.2",
+        "craftcms/cms": "^5.6",
+        "1994/social-images-core": "^1.1"
+    },
+    "require-dev": {
+        "craftcms/phpstan": "dev-main",
+        "laravel/pint": "^1.18"
+    },
+    "suggest": {
+        "spatie/browsershot": "To render images with Chrome on your server (the default renderer).",
+        "nystudio107/craft-seomatic": "To use the social image for SEOmatic's og:image and twitter:image."
+    },
+    "autoload": {
+        "psr-4": {
+            "nineteenninetyfour\\socialimages\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "nineteenninetyfour\\socialimages\\tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "handle": "social-images",
+        "name": "Social Images",
+        "developer": "1994",
+        "developerUrl": "https://1994.co.uk",
+        "documentationUrl": "https://github.com/1994limited/social-images-craft/blob/main/docs/README.md",
+        "class": "nineteenninetyfour\\socialimages\\Plugin"
+    },
+    "config": {
+        "sort-packages": true,
+        "platform": {
+            "php": "8.2"
+        },
+        "allow-plugins": {
+            "yiisoft/yii2-composer": true,
+            "craftcms/plugin-installer": true
+        }
+    }
+}

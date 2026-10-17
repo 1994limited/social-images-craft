@@ -1,0 +1,41 @@
+{% import '_includes/forms' as forms %}
+
+<div class="si-field" data-social-image="{{ preview ? preview|json_encode : '' }}">
+    {% if preview %}
+        <div class="si-field__preview" aria-live="polite">
+            <div class="si-field__frame" data-frame>
+                <span class="si-field__status" data-status>{{ 'Checking…'|t('social-images') }}</span>
+            </div>
+            <div class="si-field__actions">
+                <button type="button" class="btn small" data-regenerate {% if not enabled %}disabled{% endif %}>{{ 'Regenerate'|t('social-images') }}</button>
+                <span class="si-field__note light" data-note></span>
+            </div>
+        </div>
+    {% endif %}
+
+    {{ forms.selectField({
+        label: 'Template'|t('social-images'),
+        id: name ~ '-template',
+        name: name ~ '[template]',
+        options: templates,
+        value: value.template ?? '',
+    }) }}
+
+    {{ forms.elementSelectField({
+        label: 'Use this image instead'|t('social-images'),
+        instructions: 'Shared in place of a generated image.'|t('social-images'),
+        id: name ~ '-image',
+        name: name ~ '[imageId]',
+        elementType: elementType,
+        elements: image ? [image] : [],
+        sources: sources == '*' ? null : sources,
+        criteria: {kind: 'image'},
+        limit: 1,
+        viewMode: 'large',
+        selectionLabel: 'Choose an image'|t('social-images'),
+    }) }}
+</div>
+
+{% if preview %}
+    {% do view.registerAssetBundle('nineteenninetyfour\\socialimages\\web\\assets\\field\\FieldAsset') %}
+{% endif %}
