@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0 - Unreleased
+## 1.0.0 - 2026-10-17
 
 ### Added
 - A visual designer in the control panel: text, images, boxes and circles, bound to entries' fields, with text that fits its box, eight bundled fonts, Google Fonts and uploads, and any number of sizes per template.
