@@ -60,7 +60,8 @@
         "developer": "1994",
         "developerUrl": "https://1994.co.uk",
         "documentationUrl": "https://github.com/1994limited/social-images-craft/blob/main/docs/README.md",
-        "class": "nineteenninetyfour\\socialimages\\Plugin"
+        "class": "nineteenninetyfour\\socialimages\\Plugin",
+        "changelogUrl": "https://raw.githubusercontent.com/1994limited/social-images-craft/main/CHANGELOG.md"
     },
     "config": {
         "sort-packages": true,
