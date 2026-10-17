@@ -3,3 +3,10 @@
 /node_modules
 composer.lock
 .phpunit.cache
+/tests/.env
+/tests/_output
+/tests/_support/_generated
+/tests/_craft/storage
+/tests/_craft/config/project
+/tests/_craft/web/social-images
+/tests/_craft/web/uploads

@@ -3,7 +3,17 @@
     "description": "Social share images for Craft CMS: design Open Graph cards in the control panel, bind them to your entries' fields, and have them generated on save. Templates import and export as JSON.",
     "type": "craft-plugin",
     "license": "proprietary",
-    "keywords": ["craft", "cms", "craftcms", "craft-plugin", "open graph", "og image", "social image", "share image", "seo"],
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "open graph",
+        "og image",
+        "social image",
+        "share image",
+        "seo"
+    ],
     "authors": [
         {
             "name": "1994",
@@ -24,7 +34,11 @@
     },
     "require-dev": {
         "craftcms/phpstan": "dev-main",
-        "laravel/pint": "^1.18"
+        "laravel/pint": "^1.18",
+        "codeception/codeception": "^5.2",
+        "codeception/module-asserts": "^3.0",
+        "codeception/module-yii2": "^1.1.9",
+        "vlucas/phpdotenv": "^5.4"
     },
     "suggest": {
         "spatie/browsershot": "To render images with Chrome on your server (the default renderer).",
@@ -57,5 +71,16 @@
             "yiisoft/yii2-composer": true,
             "craftcms/plugin-installer": true
         }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../social-images-core"
+        }
+    ],
+    "scripts": {
+        "test": "codecept run"
     }
 }

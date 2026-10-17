@@ -9,8 +9,8 @@ use craft\elements\db\ElementQueryInterface;
 use craft\elements\User;
 use craft\helpers\FileHelper;
 use Illuminate\Support\Collection;
-use nineteenninetyfour\socialimages\support\Handles;
 use NineteenNinetyFour\SocialImages\Core\Rendering\Images;
+use nineteenninetyfour\socialimages\support\Handles;
 use Throwable;
 
 /**

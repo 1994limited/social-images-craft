@@ -5,10 +5,10 @@ namespace nineteenninetyfour\socialimages\models;
 use Craft;
 use craft\elements\Entry;
 use craft\web\View;
+use nineteenninetyfour\socialimages\base\Template;
 use NineteenNinetyFour\SocialImages\Core\Rendering\Page;
 use NineteenNinetyFour\SocialImages\Core\Rendering\Tokens;
 use NineteenNinetyFour\SocialImages\Core\Templates\Schema;
-use nineteenninetyfour\socialimages\base\Template;
 use nineteenninetyfour\socialimages\support\InSite;
 use Throwable;
 

@@ -1,0 +1,10 @@
+columnSuffix: null
+handle: socialImage
+instructions: null
+name: 'Social image'
+searchable: false
+settings:
+  sources: '*'
+translationKeyFormat: null
+translationMethod: none
+type: nineteenninetyfour\socialimages\fields\SocialImage

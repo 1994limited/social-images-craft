@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+<head>
+<style>
+    {{ craft.socialImages.font('Fraunces', 600) }}
+    body { margin: 0; width: {{ socialLayout.width }}px; height: {{ socialLayout.height }}px; }
+</style>
+</head>
+<body>
+    {% set cover = entry ? entry.coverImage.one() : null %}
+    {% if cover %}<img src="{{ craft.socialImages.embed(cover, 320, 480) }}" alt="">{% endif %}
+    <h1 data-fit="88">{{ entry.title ?? sample.title }}</h1>
+</body>
+</html>

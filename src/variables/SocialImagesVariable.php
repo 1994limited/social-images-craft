@@ -4,6 +4,7 @@ namespace nineteenninetyfour\socialimages\variables;
 
 use Craft;
 use craft\elements\Asset;
+use craft\elements\db\ElementQueryInterface;
 use craft\elements\Entry;
 use craft\helpers\Html;
 use NineteenNinetyFour\SocialImages\Core\Templates\Schema;
@@ -91,7 +92,7 @@ class SocialImagesVariable
      */
     public function embed(mixed $asset, int $width, int $height, string $fit = 'cover'): ?string
     {
-        if ($asset instanceof \craft\elements\db\ElementQueryInterface) {
+        if ($asset instanceof ElementQueryInterface) {
             $asset = $asset->one();
         }
 

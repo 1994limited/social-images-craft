@@ -6,6 +6,7 @@ use Craft;
 use craft\web\Controller;
 use nineteenninetyfour\socialimages\Plugin;
 use yii\web\ForbiddenHttpException;
+use yii\web\Response;
 
 /**
  * What the control panel's controllers share: permissions, and that
@@ -53,7 +54,7 @@ abstract class BaseController extends Controller
     /**
      * A control panel page that mounts one of the shared Vue pages.
      */
-    protected function page(string $page, string $title, string $subnav, array $props): \yii\web\Response
+    protected function page(string $page, string $title, string $subnav, array $props): Response
     {
         return $this->renderTemplate('social-images/_page', [
             'page' => $page,

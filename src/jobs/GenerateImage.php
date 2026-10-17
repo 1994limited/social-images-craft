@@ -127,7 +127,11 @@ class GenerateImage extends BaseJob
             // until the allowance resets, and tries again.
             if ($queued && RateLimits::caused($exception) && $this->attempt < Plugin::getInstance()->getSettings()->rateLimitAttempts) {
                 Craft::$app->getQueue()->delay($this->waitFor($exception, $resetsAt))->push(new self([
-                    ...$this->toArray(['entryId', 'siteId', 'layout', 'force', 'hash']),
+                    'entryId' => $this->entryId,
+                    'siteId' => $this->siteId,
+                    'layout' => $this->layout,
+                    'force' => $this->force,
+                    'hash' => $this->hash,
                     'attempt' => $resetsAt ? $this->attempt : $this->attempt + 1,
                 ]));
 

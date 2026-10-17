@@ -6,15 +6,16 @@ use Craft;
 use craft\base\Element;
 use craft\base\Model;
 use craft\base\Plugin as BasePlugin;
+use craft\elements\Asset;
 use craft\elements\Entry;
 use craft\events\ModelEvent;
 use craft\events\RegisterComponentTypesEvent;
+use craft\events\RegisterElementActionsEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\events\RegisterUserPermissionsEvent;
 use craft\helpers\App;
 use craft\helpers\UrlHelper;
 use craft\services\Fields;
-use craft\services\ProjectConfig;
 use craft\services\UserPermissions;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
@@ -45,7 +46,6 @@ use nineteenninetyfour\socialimages\services\Templates;
 use nineteenninetyfour\socialimages\variables\SocialImagesVariable;
 use Throwable;
 use yii\base\Event;
-use yii\web\Response;
 
 /**
  * Social Images for Craft CMS.
@@ -99,6 +99,7 @@ class Plugin extends BasePlugin
         $this->registerFieldsAndActions();
         $this->registerEntryEvents();
         $this->registerTwig();
+        $this->registerPermissions();
         Seomatic::register();
 
         Craft::$app->onInit(function () {
@@ -162,7 +163,7 @@ class Plugin extends BasePlugin
             function (string $id) {
                 $asset = $this->images()->find(['asset:'.$id], null);
 
-                return $asset instanceof \craft\elements\Asset ? [$asset->getContents(), $asset->getExtension()] : null;
+                return $asset instanceof Asset ? [$asset->getContents(), $asset->getExtension()] : null;
             },
             $settings->importMaxKilobytes,
             $settings->importTimeout,
@@ -239,7 +240,7 @@ class Plugin extends BasePlugin
             $event->types[] = SocialImage::class;
         });
 
-        Event::on(Entry::class, Element::EVENT_REGISTER_ACTIONS, function (\craft\events\RegisterElementActionsEvent $event) {
+        Event::on(Entry::class, Element::EVENT_REGISTER_ACTIONS, function (RegisterElementActionsEvent $event) {
             $event->actions[] = GenerateSocialImages::class;
         });
     }
@@ -291,12 +292,19 @@ class Plugin extends BasePlugin
     {
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function (RegisterUrlRulesEvent $event) {
             $event->rules['social-images'] = 'social-images/templates/index';
-            $event->rules['social-images/templates/new'] = 'social-images/templates/create';
             $event->rules['social-images/templates/<handle:[a-z0-9_]+>'] = 'social-images/templates/edit';
             $event->rules['social-images/images'] = 'social-images/images/index';
             $event->rules['social-images/settings'] = 'social-images/settings/edit';
         });
+    }
 
+    /**
+     * Always, not only in the control panel: saving permissions anywhere
+     * (applying Project Config from the command line, say) keeps only those
+     * registered.
+     */
+    protected function registerPermissions(): void
+    {
         Event::on(UserPermissions::class, UserPermissions::EVENT_REGISTER_PERMISSIONS, function (RegisterUserPermissionsEvent $event) {
             $event->permissions[] = [
                 'heading' => Craft::t('social-images', 'Social Images'),

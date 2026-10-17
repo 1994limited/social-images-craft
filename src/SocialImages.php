@@ -4,6 +4,7 @@ namespace nineteenninetyfour\socialimages;
 
 use Closure;
 use NineteenNinetyFour\SocialImages\Core\Rendering\Renderer;
+use NineteenNinetyFour\SocialImages\Core\Rendering\RendererManager;
 
 /**
  * The way in for your own code: add a rendering driver from a module's
@@ -17,7 +18,7 @@ use NineteenNinetyFour\SocialImages\Core\Rendering\Renderer;
 class SocialImages
 {
     /**
-     * @param  Closure(array<string, mixed>, \NineteenNinetyFour\SocialImages\Core\Rendering\RendererManager): Renderer  $factory
+     * @param  Closure(array<string, mixed>, RendererManager): Renderer  $factory
      */
     public static function extend(string $driver, Closure $factory): void
     {

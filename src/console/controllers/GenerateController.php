@@ -2,7 +2,6 @@
 
 namespace nineteenninetyfour\socialimages\console\controllers;
 
-use Craft;
 use craft\console\Controller;
 use craft\elements\Entry;
 use craft\helpers\Console;

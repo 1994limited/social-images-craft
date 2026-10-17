@@ -3,10 +3,10 @@
 namespace nineteenninetyfour\socialimages\models;
 
 use craft\elements\Entry;
+use nineteenninetyfour\socialimages\base\Template;
 use NineteenNinetyFour\SocialImages\Core\Rendering\Page;
 use NineteenNinetyFour\SocialImages\Core\Templates\Porter;
 use NineteenNinetyFour\SocialImages\Core\Templates\Schema;
-use nineteenninetyfour\socialimages\base\Template;
 use nineteenninetyfour\socialimages\Plugin;
 use nineteenninetyfour\socialimages\support\InSite;
 
