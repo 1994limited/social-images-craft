@@ -5,6 +5,7 @@ namespace nineteenninetyfour\socialimages\images;
 use Craft;
 use craft\elements\Entry;
 use nineteenninetyfour\socialimages\base\Template;
+use nineteenninetyfour\socialimages\integrations\Seomatic;
 use nineteenninetyfour\socialimages\Plugin;
 use nineteenninetyfour\socialimages\services\Output;
 use Throwable;
@@ -172,6 +173,8 @@ class Card
                 $mutex->release($lock);
             }
         }
+
+        Seomatic::forget($this->entry);
 
         return $this->path();
     }
