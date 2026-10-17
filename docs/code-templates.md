@@ -70,12 +70,21 @@ A template is a whole page, with nothing else around it:
 
 ## Loading nothing
 
-The page must load nothing over the network: the browser taking the screenshot may not be able to reach your site (Cloudflare can't reach a local site), and anything it waits for slows every image. So fonts and pictures go inside the page:
+The page should load nothing over the network: the browser taking the screenshot may not be able to reach your site (Cloudflare can't reach a local site), and anything it waits for slows every image. So fonts and pictures go inside the page:
 
 - **`craft.socialImages.font(family, weight, style)`** outputs `@font-face` rules for a font from your font library (the included fonts, or ones added in the designer), with the font inside. Use it inside `<style>`. `weight` is 400 unless you give one, and `style` is `'normal'` or `'italic'`; the nearest the font has is used.
 - **`craft.socialImages.embed(asset, width, height, fit)`** outputs an asset as a `data:` URI, resized with Craft's image library to the size you'll draw it at: cropped around its focal point, or `'contain'` as the fourth argument to fit inside. It takes an asset, or an asset query (and uses its first asset). It gives `null` for anything else.
 
 Write your CSS in the page. Don't link stylesheets, Google Fonts or your site's built CSS.
+
+## Content from other sources
+
+The page is opened by Chrome on your server (with Browsershot), so anything in it can reach what your server can: its files and its private network. Treat what goes into a code template the way you would on any page, and be careful with content that comes from other people, such as entries editors write, front-end submissions or imported content:
+
+- Keep Twig's escaping on. `{{ entry.title }}` is escaped; `|raw` and rich text fields aren't.
+- Only output rich text or `|raw` from people you trust with the server. An `<iframe>` or `<img>` in it can point at a file on the server or an internal address, and what loads ends up in the public image.
+
+Designer templates don't have this concern: their text is always shown as text and their pictures are inlined.
 
 ## Fitting text
 
