@@ -1,0 +1,46 @@
+.si-field__preview {
+    margin-bottom: 16px;
+}
+
+.si-field__frame {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1200 / 630;
+    overflow: hidden;
+    border-radius: 6px;
+    background: var(--gray-050, #f3f7fc);
+    box-shadow: inset 0 0 0 1px var(--hairline-color, rgb(51 64 77 / 0.1));
+}
+
+.si-field__frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.si-field__img--faded {
+    opacity: 0.35;
+}
+
+.si-field__status {
+    position: absolute;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.9);
+    color: var(--gray-700, #33404d);
+    font-size: 12px;
+}
+
+.si-field__frame:has(img) .si-field__status:empty {
+    display: none;
+}
+
+.si-field__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+}

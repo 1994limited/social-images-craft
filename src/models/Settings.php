@@ -125,10 +125,10 @@ class Settings extends Model
             }
 
             $rules[] = [
-                'sections' => array_values(array_filter((array) ($rule['sections'] ?? []), 'is_string')),
-                'sites' => array_values(array_filter((array) ($rule['sites'] ?? []), 'is_string')),
+                'sections' => array_values(array_filter((array) ($rule['sections'] ?? []), fn ($value) => is_string($value) && $value !== '')),
+                'sites' => array_values(array_filter((array) ($rule['sites'] ?? []), fn ($value) => is_string($value) && $value !== '')),
                 'template' => (string) $rule['template'],
-                'layouts' => array_values(array_filter((array) ($rule['layouts'] ?? []), 'is_string')),
+                'layouts' => array_values(array_filter((array) ($rule['layouts'] ?? []), fn ($value) => is_string($value) && $value !== '')),
             ];
         }
 

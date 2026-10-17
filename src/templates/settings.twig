@@ -1,0 +1,196 @@
+{#
+    Social Images → Settings. Saved to Project Config.
+#}
+{% extends '_layouts/cp' %}
+{% import '_includes/forms' as forms %}
+
+{% set fullPageForm = not readOnly %}
+{% do view.registerAssetBundle('nineteenninetyfour\\socialimages\\web\\assets\\cp\\CpAsset') %}
+
+{% block content %}
+    {% if readOnly %}
+        <div class="readable">
+            <p class="warning with-icon">{{ 'Settings are saved to Project Config, so they can only be changed where admin changes are allowed.'|t('social-images') }}</p>
+        </div>
+    {% endif %}
+
+    {{ actionInput('social-images/settings/save') }}
+    {{ redirectInput('social-images/settings') }}
+
+    <h2>{{ 'Templates'|t('social-images') }}</h2>
+    <p class="light">{{ 'Which template entries use. The first rule that matches an entry is used; an entry can also choose its own in its Social image field.'|t('social-images') }}</p>
+
+    <div class="si-rules" data-si-rules>
+        {% for rule in rules %}
+            {{ _self.rule(loop.index0, rule, sections, sites, templates, layouts, multisite, readOnly) }}
+        {% endfor %}
+    </div>
+
+    {% if not readOnly %}
+        <template data-si-rule-template>{{ _self.rule('__INDEX__', {sections: [], sites: [], template: '', layouts: []}, sections, sites, templates, layouts, multisite, false) }}</template>
+        <button type="button" class="btn add icon dashed" data-si-add-rule>{{ 'Add rule'|t('social-images') }}</button>
+    {% endif %}
+
+    <hr>
+
+    <h2>{{ 'Generating'|t('social-images') }}</h2>
+
+    {{ forms.lightswitchField({
+        label: 'Generate when an entry is saved'|t('social-images'),
+        instructions: 'Otherwise images are made when a page first asks for one, or from Social Images → Images.'|t('social-images'),
+        name: 'generateOnSave',
+        on: settings.generateOnSave,
+        disabled: readOnly,
+    }) }}
+
+    {{ forms.elementSelectField({
+        label: 'Fallback image'|t('social-images'),
+        instructions: 'Shared while an entry’s image is being made, and for pages without one.'|t('social-images'),
+        id: 'fallbackImageId',
+        name: 'fallbackImageId',
+        elementType: 'craft\\elements\\Asset',
+        elements: fallback ? [fallback] : [],
+        criteria: {kind: 'image'},
+        limit: 1,
+        viewMode: 'large',
+        disabled: readOnly,
+    }) }}
+
+    <hr>
+
+    <h2>{{ 'Where images are saved'|t('social-images') }}</h2>
+
+    {{ forms.selectField({
+        label: 'Filesystem'|t('social-images'),
+        instructions: 'A filesystem with public URLs.'|t('social-images'),
+        name: 'imagesFs',
+        options: filesystems,
+        value: settings.imagesFs,
+        disabled: readOnly,
+    }) }}
+
+    {{ forms.textField({
+        label: 'Folder'|t('social-images'),
+        name: 'imagesPath',
+        value: settings.imagesPath,
+        placeholder: 'social-images',
+        disabled: readOnly,
+    }) }}
+
+    <hr>
+
+    <h2>{{ 'Rendering'|t('social-images') }}</h2>
+    <p>{{ 'Images are rendered with {driver}. Change it with SOCIAL_IMAGES_RENDERER in .env.'|t('social-images', {driver: '<code>' ~ driver ~ '</code>'})|raw }}</p>
+    <div class="si-check" data-si-check="{{ checkUrl }}">
+        <button type="button" class="btn" data-si-check-button>{{ 'Test'|t('social-images') }}</button>
+        <p class="si-check__result" data-si-check-result role="status" hidden></p>
+    </div>
+
+    <hr>
+
+    <h2>SEOmatic</h2>
+    {% if not seomaticInstalled %}
+        <p class="light">{{ 'SEOmatic isn’t installed. Without it, add {{ craft.socialImages.meta() }} to your layout’s <head>.'|t('social-images') }}</p>
+    {% endif %}
+
+    {{ forms.radioGroupField({
+        label: 'Use the social image for og:image and twitter:image'|t('social-images'),
+        name: 'seomatic',
+        options: [
+            {label: 'Unless the entry has its own SEO image'|t('social-images'), value: 'replace'},
+            {label: 'Always'|t('social-images'), value: 'always'},
+            {label: 'Never'|t('social-images'), value: 'off'},
+        ],
+        value: settings.seomatic,
+        disabled: readOnly,
+    }) }}
+
+    {% js %}
+        (function () {
+            const rules = document.querySelector('[data-si-rules]');
+            const template = document.querySelector('[data-si-rule-template]');
+            let next = rules.children.length;
+
+            document.querySelector('[data-si-add-rule]')?.addEventListener('click', () => {
+                rules.insertAdjacentHTML('beforeend', template.innerHTML.replaceAll('__INDEX__', next++));
+            });
+
+            rules.addEventListener('click', (event) => {
+                if (event.target.closest('[data-si-remove-rule]')) {
+                    event.target.closest('.si-rule').remove();
+                }
+            });
+
+            const check = document.querySelector('[data-si-check]');
+            const button = check.querySelector('[data-si-check-button]');
+            const result = check.querySelector('[data-si-check-result]');
+
+            button.addEventListener('click', async () => {
+                button.classList.add('loading');
+                button.disabled = true;
+                result.hidden = true;
+
+                try {
+                    const response = await Craft.sendActionRequest('POST', 'social-images/settings/check');
+                    const data = response.data;
+                    result.textContent = data.message + (data.fix ? ' ' + data.fix : '');
+                    result.className = 'si-check__result ' + (data.ok ? 'success' : 'error');
+                } catch (error) {
+                    result.textContent = error?.response?.data?.message ?? Craft.t('social-images', 'The check couldn’t run.');
+                    result.className = 'si-check__result error';
+                } finally {
+                    result.hidden = false;
+                    button.classList.remove('loading');
+                    button.disabled = false;
+                }
+            });
+        })();
+    {% endjs %}
+{% endblock %}
+
+{% macro rule(index, rule, sections, sites, templates, layouts, multisite, readOnly) %}
+    {% import '_includes/forms' as forms %}
+    <div class="si-rule">
+        <div class="si-rule__fields">
+            {{ forms.checkboxSelectField({
+                label: 'Sections'|t('social-images'),
+                instructions: 'Leave all unticked for every section.'|t('social-images'),
+                name: 'rules[' ~ index ~ '][sections]',
+                options: sections,
+                values: rule.sections,
+                disabled: readOnly,
+            }) }}
+
+            {% if multisite %}
+                {{ forms.checkboxSelectField({
+                    label: 'Sites'|t('social-images'),
+                    instructions: 'Leave all unticked for every site.'|t('social-images'),
+                    name: 'rules[' ~ index ~ '][sites]',
+                    options: sites,
+                    values: rule.sites,
+                    disabled: readOnly,
+                }) }}
+            {% endif %}
+
+            {{ forms.selectField({
+                label: 'Template'|t('social-images'),
+                name: 'rules[' ~ index ~ '][template]',
+                options: [{label: '—', value: ''}]|merge(templates),
+                value: rule.template,
+                disabled: readOnly,
+            }) }}
+
+            {{ forms.checkboxGroupField({
+                label: 'Also make'|t('social-images'),
+                instructions: 'Sizes made on save beside Open Graph, if the template has them. Others are made when a page asks for them.'|t('social-images'),
+                name: 'rules[' ~ index ~ '][layouts]',
+                options: layouts,
+                values: rule.layouts,
+                disabled: readOnly,
+            }) }}
+        </div>
+        {% if not readOnly %}
+            <button type="button" class="btn small si-rule__remove" data-si-remove-rule>{{ 'Remove rule'|t('social-images') }}</button>
+        {% endif %}
+    </div>
+{% endmacro %}

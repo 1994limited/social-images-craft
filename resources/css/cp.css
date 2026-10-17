@@ -1,0 +1,216 @@
+/*
+    Craft's versions of the components the shared pages use (see
+    resources/js/ui), in the spirit of Craft's own.
+*/
+.si-app {
+    --si-accent: var(--primary-color, #e5422b);
+}
+
+.si-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.si-btn .si-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.si-btn--ghost:not(:hover) {
+    background: transparent;
+    box-shadow: none;
+}
+
+.si-btn--icon {
+    padding-inline: 7px;
+}
+
+.si-btn--danger {
+    color: var(--error-color, #cf1124);
+}
+
+.si-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.si-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.si-dropdown__panel {
+    position: absolute;
+    z-index: 100;
+    top: calc(100% + 4px);
+    min-width: 200px;
+    padding: 6px;
+    border-radius: 6px;
+    background: var(--white, #fff);
+    box-shadow: 0 0 0 1px rgb(31 41 51 / 0.1), 0 5px 20px rgb(31 41 51 / 0.25);
+}
+
+.si-dropdown__panel--end {
+    right: 0;
+}
+
+.si-dropdown__panel--start {
+    left: 0;
+}
+
+.si-menu {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.si-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 10px;
+    border: 0;
+    border-radius: 4px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.si-menu__item:hover,
+.si-menu__item:focus-visible {
+    background: var(--gray-050, #f3f7fc);
+    text-decoration: none;
+}
+
+.si-menu__item--danger {
+    color: var(--error-color, #cf1124);
+}
+
+.si-menu__separator {
+    height: 1px;
+    margin: 6px 0;
+    background: var(--hairline-color, rgb(51 64 77 / 0.1));
+}
+
+.si-modal {
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 10vh 16px 16px;
+    background: rgb(31 41 51 / 0.5);
+    overflow: auto;
+}
+
+.si-modal__dialog {
+    width: 100%;
+    max-width: 640px;
+    border-radius: 8px;
+    background: var(--white, #fff);
+    box-shadow: 0 25px 100px rgb(31 41 51 / 0.5);
+}
+
+.si-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--hairline-color, rgb(51 64 77 / 0.1));
+}
+
+.si-modal__header h2 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.si-modal__close {
+    display: inline-flex;
+    padding: 4px;
+    border: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.si-modal__close .si-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.si-modal__body {
+    padding: 24px;
+}
+
+.si-badge {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 18px;
+    white-space: nowrap;
+    background: var(--gray-100, #e4edf6);
+    color: var(--gray-700, #33404d);
+}
+
+.si-badge--green { background: #dcfce7; color: #166534; }
+.si-badge--amber { background: #fef3c7; color: #92400e; }
+.si-badge--blue { background: #dbeafe; color: #1e40af; }
+.si-badge--red { background: #fee2e2; color: #991b1b; }
+.si-badge--purple { background: #f3e8ff; color: #6b21a8; }
+
+.si-input {
+    position: relative;
+}
+
+.si-input__clear {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    border: 0;
+    background: none;
+    color: var(--gray-500, #606d7b);
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* The settings page. */
+.si-rule {
+    position: relative;
+    margin-bottom: 16px;
+    padding: 16px 20px;
+    border-radius: 6px;
+    box-shadow: 0 0 0 1px var(--hairline-color, rgb(51 64 77 / 0.1));
+}
+
+.si-rule__fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0 24px;
+}
+
+.si-rule__remove {
+    margin-top: 8px;
+}
+
+.si-check {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.si-check__result {
+    margin: 0;
+}

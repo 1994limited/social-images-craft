@@ -137,7 +137,7 @@ class Plugin extends BasePlugin
 
     public function tokens(): Tokens
     {
-        return $this->made['tokens'] ??= new Tokens($this->values(), ['section:title' => 'Journal', 'collection:title' => 'Journal']);
+        return $this->made['tokens'] ??= new Tokens($this->values());
     }
 
     public function images(): CraftImages

@@ -65,7 +65,8 @@ class CraftValues implements Values
 
     public function formatDate(DateTimeInterface $date, string $format): string
     {
-        return Craft::$app->getFormatter()->asDate($date, 'php:'.$format);
+        // Craft's formatter takes DateTime, not DateTimeImmutable.
+        return Craft::$app->getFormatter()->asDate(\DateTime::createFromInterface($date), 'php:'.$format);
     }
 
     /**

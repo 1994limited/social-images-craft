@@ -1,0 +1,14 @@
+{#
+    A control panel page that mounts one of the shared Vue pages
+    (social-images-core's resources/designer/pages).
+#}
+{% extends '_layouts/cp' %}
+
+{% do view.registerAssetBundle('nineteenninetyfour\\socialimages\\web\\assets\\cp\\CpAsset') %}
+{% do view.registerTranslations('social-images', ['Collection', 'All collections', 'No entries have a template yet. Choose which template each collection uses in the settings.']) %}
+
+{% block content %}
+    <div class="si-app si-page si-page--{{ page|lower }}">
+        <div data-social-images="{{ page }}" data-props="{{ props|json_encode(constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES')) }}"></div>
+    </div>
+{% endblock %}
