@@ -12,7 +12,6 @@ use craft\fields\Color;
 use craft\fields\Date;
 use craft\fields\Dropdown;
 use craft\fields\Email;
-use craft\fields\Lightswitch;
 use craft\fields\Link;
 use craft\fields\Number;
 use craft\fields\PlainText;
@@ -29,7 +28,7 @@ use nineteenninetyfour\socialimages\fields\SocialImage;
 class Catalog
 {
     /** Field types whose value reads as text, besides rich text (matched by name). */
-    protected const TEXT = [PlainText::class, Number::class, Date::class, Dropdown::class, RadioButtons::class, Checkboxes::class, Lightswitch::class, Color::class, Email::class, Url::class, Link::class];
+    protected const TEXT = [PlainText::class, Number::class, Date::class, Dropdown::class, RadioButtons::class, Checkboxes::class, Color::class, Email::class, Url::class, Link::class];
 
     /**
      * @return array<int, array{handle: string, title: string, fields: array<int, array{handle: string, display: string, type: string, kind: string}>}>

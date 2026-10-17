@@ -114,8 +114,9 @@
                 Craft.cp.displaySuccess(t('Image generated'));
             } catch (error) {
                 const data = error?.response?.data ?? {};
-                message(data.message || t('The image couldn’t be generated.'));
-                Craft.cp.displayError(data.message || t('The image couldn’t be generated.'));
+                const text = [data.message || t('The image couldn’t be generated.'), data.fix].filter(Boolean).join(' ');
+                message(text);
+                Craft.cp.displayError(text);
             } finally {
                 button.classList.remove('loading');
                 button.disabled = false;

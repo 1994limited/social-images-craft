@@ -33,6 +33,12 @@ class GenerateSocialImages extends ElementAction
             return false;
         }
 
+        if (! Plugin::getInstance()->getSettings()->enabled) {
+            $this->setMessage(Craft::t('social-images', 'Social images are turned off in the configuration.'));
+
+            return false;
+        }
+
         $cards = Plugin::getInstance()->cards;
         $queued = 0;
 
