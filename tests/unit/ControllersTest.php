@@ -277,4 +277,50 @@ class ControllersTest extends TestCase
 
         $this->assertMatchesRegularExpression('#/templates/[a-z0-9_]{1,40}$#', $data['redirect']);
     }
+
+    public function test_the_status_check_is_a_post(): void
+    {
+        $this->template();
+        $this->useTemplate('basic', ['journal']);
+        $entry = $this->entry();
+        $this->actingAs();
+
+        try {
+            $this->expectException(BadRequestHttpException::class);
+            $this->action('social-images/images/status', ['entryId' => $entry->id, 'siteId' => $entry->siteId], 'GET');
+        } finally {
+            $_SERVER['HTTP_ACCEPT'] = 'application/json';
+            $data = $this->json($this->action('social-images/images/status', body: ['entryId' => $entry->id, 'siteId' => $entry->siteId]));
+            unset($_SERVER['HTTP_ACCEPT']);
+            $this->assertSame('queued', $data['state']);
+        }
+    }
+
+    public function test_settings_cant_be_saved_without_admin_changes(): void
+    {
+        $this->actingAs();
+        Craft::$app->getConfig()->getGeneral()->allowAdminChanges = false;
+
+        try {
+            $this->expectException(ForbiddenHttpException::class);
+            $this->action('social-images/settings/save', body: ['seomatic' => 'off']);
+        } finally {
+            Craft::$app->getConfig()->getGeneral()->allowAdminChanges = true;
+        }
+    }
+
+    public function test_changes_need_a_csrf_token(): void
+    {
+        $this->template();
+        $this->actingAs();
+        Craft::$app->getRequest()->enableCsrfValidation = true;
+
+        try {
+            $this->expectException(BadRequestHttpException::class);
+            $this->action('social-images/templates/delete', ['handle' => 'basic'], 'DELETE');
+        } finally {
+            Craft::$app->getRequest()->enableCsrfValidation = false;
+            $this->assertNotNull($this->plugin()->templates->find('basic'));
+        }
+    }
 }

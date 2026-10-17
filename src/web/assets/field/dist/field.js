@@ -50,8 +50,10 @@
             let data;
 
             try {
-                const response = await fetch(config.statusUrl, { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
-                data = await response.json();
+                const response = await Craft.sendActionRequest('POST', 'social-images/images/status', {
+                    data: { entryId: config.entryId, siteId: config.siteId },
+                });
+                data = response.data;
             } catch {
                 note.textContent = t('Couldn’t check the image.');
                 return;

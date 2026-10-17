@@ -8,6 +8,7 @@ use craft\base\Model;
 use craft\base\Plugin as BasePlugin;
 use craft\elements\Asset;
 use craft\elements\Entry;
+use craft\events\ElementEvent;
 use craft\events\ModelEvent;
 use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterElementActionsEvent;
@@ -15,6 +16,7 @@ use craft\events\RegisterUrlRulesEvent;
 use craft\events\RegisterUserPermissionsEvent;
 use craft\helpers\App;
 use craft\helpers\UrlHelper;
+use craft\services\Elements;
 use craft\services\Fields;
 use craft\services\UserPermissions;
 use craft\web\twig\variables\CraftVariable;
@@ -268,6 +270,12 @@ class Plugin extends BasePlugin
             } catch (Throwable $exception) {
                 // A bad template mustn't stop an entry saving.
                 Craft::error('Social Images couldn’t queue an image: '.$exception->getMessage(), 'social-images');
+            }
+        });
+
+        Event::on(Elements::class, Elements::EVENT_AFTER_DELETE_FOR_SITE, function (ElementEvent $event) {
+            if ($event->element instanceof Entry && $event->element->id && $event->element->sectionId) {
+                $this->cards->forgetSite($event->element);
             }
         });
 

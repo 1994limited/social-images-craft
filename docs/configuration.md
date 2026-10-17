@@ -17,7 +17,7 @@ Choices about your content are on the settings page, saved to Project Config; ho
 
 ### Where images are saved
 
-With no filesystem chosen, images go in your web root, in `web/social-images`. Or choose any filesystem with public URLs (a local one, S3, R2 and so on) and a folder in it.
+With no filesystem chosen, images go in your web root, in `web/social-images`. Or choose any filesystem with public URLs (a local one, S3, R2 and so on) and a folder in it. If its URL comes from an environment variable that isn't set, pages use the fallback image and a warning is logged.
 
 Images go to `{folder}/{entry ID}/{site ID}/{size}-{fingerprint}.png`. Entries keep their ID across sites in Craft, so the site is part of the path. Images can be remade at any time, so the folder needn't be in your repository.
 

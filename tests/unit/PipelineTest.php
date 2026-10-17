@@ -4,7 +4,11 @@ namespace nineteenninetyfour\socialimages\tests\unit;
 
 use Craft;
 use craft\elements\Entry;
+use craft\events\ElementEvent;
+use craft\fs\Local;
+use craft\services\Elements;
 use NineteenNinetyFour\SocialImages\Core\Rendering\Exceptions\RenderFailed;
+use nineteenninetyfour\socialimages\images\Card;
 use nineteenninetyfour\socialimages\jobs\GenerateImage;
 
 class PipelineTest extends TestCase
@@ -187,5 +191,71 @@ class PipelineTest extends TestCase
         $this->settings(['generateOnSave' => false]);
 
         $this->assertSame([], $this->plugin()->cards->for($this->entry())->files());
+    }
+
+    public function test_removing_an_entry_from_a_site_removes_that_sites_images(): void
+    {
+        $this->template();
+        $this->useTemplate('basic', ['journal']);
+        $entry = $this->entry();
+        $this->runQueue();
+        $card = $this->plugin()->cards->for($entry);
+        $this->assertTrue($card->exists());
+
+        Craft::$app->getElements()->trigger(Elements::EVENT_AFTER_DELETE_FOR_SITE, new ElementEvent(['element' => $entry]));
+
+        $this->assertFalse($card->exists());
+    }
+
+    public function test_asking_while_its_rendering_doesnt_queue_it_again(): void
+    {
+        $this->template();
+        $this->useTemplate('basic', ['journal']);
+        $this->settings(['generateOnSave' => false]);
+        $entry = $this->entry();
+        $card = $this->plugin()->cards->for($entry);
+        $this->assertTrue(GenerateImage::queue($card));
+
+        $camera = new class extends FakeCamera
+        {
+            public ?Card $card = null;
+
+            public ?bool $asked = null;
+
+            public function capture(string $html, int $width, int $height): string
+            {
+                $this->asked = GenerateImage::queue($this->card);
+
+                return self::PNG;
+            }
+        };
+        $camera->card = $card;
+        $this->plugin()->set('camera', $camera);
+
+        $this->runQueue();
+
+        $this->assertFalse($camera->asked);
+        // And once it's done, it can be queued again.
+        $this->assertTrue(GenerateImage::queue($card, force: true));
+    }
+
+    public function test_a_filesystem_with_no_url_falls_back(): void
+    {
+        $fallback = $this->asset('fallback.png');
+        $this->template();
+        $this->useTemplate('basic', ['journal']);
+        $this->settings(['fallbackImageId' => $fallback->id]);
+        $entry = $this->entry();
+        $this->runQueue();
+
+        $output = $this->plugin()->output;
+        $fs = new Local(['path' => CRAFT_ROOT_PATH.'/web', 'hasUrls' => true, 'url' => '$UNSET_SOCIAL_IMAGES_URL']);
+        (new \ReflectionProperty($output, 'fs'))->setValue($output, $fs);
+
+        try {
+            $this->assertSame('fallback', $this->plugin()->cards->image($entry)['source']);
+        } finally {
+            (new \ReflectionProperty($output, 'fs'))->setValue($output, null);
+        }
     }
 }

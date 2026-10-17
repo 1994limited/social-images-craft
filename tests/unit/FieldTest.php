@@ -3,6 +3,8 @@
 namespace nineteenninetyfour\socialimages\tests\unit;
 
 use Craft;
+use craft\base\Element;
+use craft\elements\Entry;
 
 class FieldTest extends TestCase
 {
@@ -58,5 +60,25 @@ class FieldTest extends TestCase
 
         $this->assertNull($value->template);
         $this->assertNull($value->imageId);
+    }
+
+    public function test_the_image_chosen_must_be_one_the_field_offers(): void
+    {
+        $field = Craft::$app->getFields()->getFieldByHandle('socialImage');
+        $sources = $field->sources;
+        $field->sources = ['volume:not-this-one'];
+
+        try {
+            $photo = $this->asset('elsewhere.png');
+            $section = Craft::$app->getEntries()->getSectionByHandle('journal');
+            $entry = new Entry(['sectionId' => $section->id, 'typeId' => $section->getEntryTypes()[0]->id, 'title' => 'Sneaky']);
+            $entry->setFieldValues(['socialImage' => ['imageId' => [$photo->id]]]);
+            $entry->setScenario(Element::SCENARIO_LIVE);
+
+            $this->assertFalse(Craft::$app->getElements()->saveElement($entry));
+            $this->assertArrayHasKey('socialImage', $entry->getErrors());
+        } finally {
+            $field->sources = $sources;
+        }
     }
 }

@@ -13,6 +13,7 @@ use nineteenninetyfour\socialimages\jobs\GenerateImage;
 use nineteenninetyfour\socialimages\models\SocialImageValue;
 use nineteenninetyfour\socialimages\Plugin;
 use yii\base\Component;
+use yii\base\InvalidConfigException;
 
 /**
  * Which image an entry gets, and where to find it.
@@ -131,17 +132,21 @@ class Cards extends Component
         }
 
         if ($entry && $card = $this->for($entry, $layout)) {
-            if ($card->exists()) {
-                return $this->generated($card, $card->url());
-            }
+            try {
+                if ($card->exists()) {
+                    return $this->generated($card, $card->url());
+                }
 
-            if (Plugin::getInstance()->getSettings()->enabled) {
-                GenerateImage::queue($card);
-            }
+                if (Plugin::getInstance()->getSettings()->enabled) {
+                    GenerateImage::queue($card);
+                }
 
-            // Until the new one is made, the image it replaces.
-            if ($previous = $card->previous()) {
-                return $this->generated($card, Plugin::getInstance()->output->url($previous));
+                // Until the new one is made, the image it replaces.
+                if ($previous = $card->previous()) {
+                    return $this->generated($card, Plugin::getInstance()->output->url($previous));
+                }
+            } catch (InvalidConfigException $exception) {
+                Craft::warning($exception->getMessage(), 'social-images');
             }
         }
 
@@ -176,6 +181,15 @@ class Cards extends Component
     {
         $output = Plugin::getInstance()->output;
         $output->deleteDirectory($output->directory().'/'.$entry->id);
+    }
+
+    /**
+     * Remove an entry's images in one site, when it's taken out of it.
+     */
+    public function forgetSite(Entry $entry): void
+    {
+        $output = Plugin::getInstance()->output;
+        $output->deleteDirectory($output->directory().'/'.$entry->id.'/'.$entry->siteId);
     }
 
     /**

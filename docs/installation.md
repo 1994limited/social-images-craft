@@ -55,4 +55,4 @@ php craft plugin/uninstall social-images
 composer remove 1994/social-images-craft
 ```
 
-Your templates stay in Project Config, your fonts and pictures in `social-images`, and the images in their folder until you delete them.
+Uninstalling removes the templates and settings from Project Config. Export any template you want to keep first. Your fonts and pictures stay in `social-images`, and the images in their folder, until you delete them.

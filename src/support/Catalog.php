@@ -61,7 +61,6 @@ class Catalog
         $query = Entry::find()
             ->section($section && in_array($section, $handles, true) ? $section : $handles)
             ->site('*')
-            ->unique()
             ->status(null)
             ->orderBy(['postDate' => SORT_DESC])
             ->limit($limit * 3);

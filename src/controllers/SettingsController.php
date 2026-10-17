@@ -20,7 +20,8 @@ class SettingsController extends BaseController
 {
     public function actionEdit(): Response
     {
-        $this->requireAdmin();
+        // Shown read-only where admin changes aren't allowed.
+        $this->requireAdmin(false);
 
         $plugin = Plugin::getInstance();
         $settings = $plugin->getSettings();
@@ -76,6 +77,8 @@ class SettingsController extends BaseController
     public function actionSave(): ?Response
     {
         $this->requirePostRequest();
+        // Settings are Project Config: Craft's check refuses where admin
+        // changes aren't allowed.
         $this->requireAdmin();
 
         $plugin = Plugin::getInstance();

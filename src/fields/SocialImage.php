@@ -8,7 +8,6 @@ use craft\base\Field;
 use craft\elements\Asset;
 use craft\elements\Entry;
 use craft\helpers\Json;
-use craft\helpers\UrlHelper;
 use nineteenninetyfour\socialimages\models\SocialImageValue;
 use nineteenninetyfour\socialimages\Plugin;
 use yii\db\Schema;
@@ -95,8 +94,6 @@ class SocialImage extends Field
         if ($element instanceof Entry && $element->id && ! $element->getIsUnpublishedDraft()) {
             $canonical = $element->getCanonical();
             $preview = [
-                'statusUrl' => UrlHelper::actionUrl('social-images/images/status', ['entryId' => $canonical->id, 'siteId' => $canonical->siteId]),
-                'regenerateUrl' => UrlHelper::actionUrl('social-images/images/regenerate'),
                 'entryId' => $canonical->id,
                 'siteId' => $canonical->siteId,
             ];
@@ -113,6 +110,38 @@ class SocialImage extends Field
             'sources' => $this->sources,
             'elementType' => Asset::class,
         ]);
+    }
+
+    public function getElementValidationRules(): array
+    {
+        return ['validateImage'];
+    }
+
+    /**
+     * The image chosen instead must be an image, from the volumes the field
+     * offers, that the person choosing it can see. Checked only when it
+     * changes, so someone else saving the entry later isn't stopped by a
+     * choice they didn't make.
+     */
+    public function validateImage(ElementInterface $element): void
+    {
+        $value = $element->getFieldValue($this->handle);
+
+        if (! $value instanceof SocialImageValue || ! $value->imageId || ! $element->isFieldDirty($this->handle)) {
+            return;
+        }
+
+        $asset = Asset::find()->id($value->imageId)->status(null)->one();
+        $user = Craft::$app->getUser()->getIdentity();
+
+        $allowed = $asset
+            && $asset->kind === Asset::KIND_IMAGE
+            && ($this->sources === '*' || $this->sources === null || in_array('volume:'.$asset->getVolume()->uid, (array) $this->sources, true))
+            && (! $user || Craft::$app->getElements()->canView($asset, $user));
+
+        if (! $allowed) {
+            $element->addError($this->handle, Craft::t('social-images', 'That image can’t be used here.'));
+        }
     }
 
     public function getSettingsHtml(): ?string

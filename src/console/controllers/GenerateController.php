@@ -80,8 +80,10 @@ class GenerateController extends Controller
             }
 
             if ($this->queue) {
-                GenerateImage::queue($card, $this->force);
-                $this->stdout("  {$label} ".$this->ansiFormat('queued', Console::FG_BLUE)."\n");
+                $queued = GenerateImage::queue($card, $this->force);
+                $this->stdout("  {$label} ".($queued
+                    ? $this->ansiFormat('queued', Console::FG_BLUE)
+                    : $this->ansiFormat(GenerateImage::recentlyFailed($card) ? 'failed a moment ago, not queued' : 'already queued', Console::FG_GREY))."\n");
 
                 continue;
             }

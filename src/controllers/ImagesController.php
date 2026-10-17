@@ -54,11 +54,13 @@ class ImagesController extends BaseController
     /**
      * The entry's current image, or a null URL while it's still being made.
      */
-    public function actionStatus(int $entryId, int $siteId): Response
+    public function actionStatus(): Response
     {
+        // A POST, with Craft's CSRF check: asking can start a render.
+        $this->requirePostRequest();
         $this->requireAcceptsJson();
 
-        $entry = $this->entry($entryId, $siteId);
+        $entry = $this->entry((int) $this->request->getRequiredParam('entryId'), (int) $this->request->getRequiredParam('siteId'));
         $layout = $this->layout();
         $plugin = Plugin::getInstance();
         $card = $plugin->cards->for($entry, $layout);

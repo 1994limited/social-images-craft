@@ -11,6 +11,7 @@ use craft\models\FsListing;
 use nineteenninetyfour\socialimages\Plugin;
 use Throwable;
 use yii\base\Component;
+use yii\base\InvalidConfigException;
 
 /**
  * Where generated images are kept: a folder in a filesystem chosen in the
@@ -73,13 +74,21 @@ class Output extends Component
         $fs = $this->fs();
         $temporary = $path.'.'.bin2hex(random_bytes(4)).'.tmp';
 
-        $fs->write($temporary, $contents, ['visibility' => 'public', 'mimetype' => 'image/png']);
-
-        if ($fs->fileExists($path)) {
-            $fs->deleteFile($path);
+        try {
+            $fs->write($temporary, $contents, ['visibility' => 'public', 'mimetype' => 'image/png']);
+            // Moving onto the old file replaces it (a rename locally, a copy
+            // then a delete on S3 and the like), so if the move fails, the
+            // last good image is still there.
+            $fs->renameFile($temporary, $path, ['visibility' => 'public', 'mimetype' => 'image/png']);
+        } finally {
+            try {
+                if ($fs->fileExists($temporary)) {
+                    $fs->deleteFile($temporary);
+                }
+            } catch (Throwable) {
+            }
         }
 
-        $fs->renameFile($temporary, $path, ['visibility' => 'public', 'mimetype' => 'image/png']);
         Craft::$app->getCache()->set($this->cacheKey($path), time(), 86400);
     }
 
@@ -100,8 +109,15 @@ class Output extends Component
 
     public function url(string $path): string
     {
-        $root = rtrim((string) $this->fs()->getRootUrl(), '/');
-        $url = $root.'/'.ltrim($path, '/');
+        $root = $this->fs()->getRootUrl();
+
+        // A filesystem with no URL (one whose URL is an unset environment
+        // variable, say) can't be shared.
+        if ($root === null || $root === '') {
+            throw new InvalidConfigException('Social Images’ filesystem has no public URL.');
+        }
+
+        $url = rtrim($root, '/').'/'.ltrim($path, '/');
 
         return UrlHelper::isAbsoluteUrl($url) ? $url : UrlHelper::siteUrl(ltrim($url, '/'));
     }

@@ -101,21 +101,25 @@ class GenerateImage extends BaseJob
         $card = $entry ? Plugin::getInstance()->cards->for($entry, $this->layout) : null;
         $cache = Craft::$app->getCache();
 
-        if ($this->hash !== null && $card) {
-            $cache->delete(self::queuedKey($card->key(), $this->hash));
-        }
-
         if (! $card) {
             return null;
         }
 
+        // Kept while this job runs, so a page or the field asking meanwhile
+        // doesn't queue the same render again; let go however it ends.
+        $done = fn () => $this->hash !== null && $cache->delete(self::queuedKey($card->key(), $this->hash));
+
         if (! $this->force && $card->exists()) {
+            $done();
+
             return $card->path();
         }
 
         // The entry has changed since this job was queued: the change queued
         // a job of its own for what it shows now, so this one stands down.
         if (! $this->force && $this->hash !== null && $this->hash !== $card->hash()) {
+            $done();
+
             return null;
         }
 
@@ -144,11 +148,13 @@ class GenerateImage extends BaseJob
             }
 
             $cache->set(self::failureKey($card->key(), $card->hash()), true, $resetsAt ? max(60, $resetsAt->getTimestamp() - time()) : 300);
+            $done();
 
             throw $exception;
         }
 
         $cache->delete(self::failureKey($card->key(), $card->hash()));
+        $done();
 
         return $path;
     }
