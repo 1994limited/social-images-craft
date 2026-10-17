@@ -138,4 +138,16 @@ trait Helpers
     {
         Craft::$app->getQueue()->run();
     }
+
+    /**
+     * A designer page's layout and data, which it carries base64-encoded.
+     */
+    protected function pageData(string $html): string
+    {
+        if (! preg_match('/atob\("([A-Za-z0-9+\/=]+)"\)/', $html, $match)) {
+            return $html;
+        }
+
+        return base64_decode($match[1]);
+    }
 }

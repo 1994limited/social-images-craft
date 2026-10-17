@@ -69,11 +69,15 @@ class Settings extends Model
 
     public int $importTimeout = 15;
 
-    public function init(): void
+    /**
+     * The renderer settings, with what .env sets filling in whatever
+     * config/social-images.php leaves out.
+     *
+     * @return array{driver: string, drivers: array<string, array>}
+     */
+    public function rendererConfig(): array
     {
-        parent::init();
-
-        $this->renderer = array_replace_recursive([
+        return array_replace_recursive([
             'driver' => App::env('SOCIAL_IMAGES_RENDERER') ?: 'browsershot',
             'drivers' => [
                 'browsershot' => [

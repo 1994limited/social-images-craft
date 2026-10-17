@@ -5,6 +5,7 @@ namespace nineteenninetyfour\socialimages\controllers;
 use Craft;
 use craft\web\Controller;
 use nineteenninetyfour\socialimages\Plugin;
+use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\Response;
 
@@ -38,6 +39,17 @@ abstract class BaseController extends Controller
 
         if (! Craft::$app->getConfig()->getGeneral()->allowAdminChanges) {
             throw new ForbiddenHttpException(Craft::t('social-images', 'Templates can only be changed where admin changes are allowed.'));
+        }
+    }
+
+    /**
+     * For actions the designer calls with PATCH or DELETE: anything but a
+     * safe method, so CSRF validation applies.
+     */
+    protected function requireUnsafeMethod(): void
+    {
+        if (in_array($this->request->getMethod(), ['GET', 'HEAD', 'OPTIONS'], true)) {
+            throw new BadRequestHttpException('Changes can’t be made with a GET request.');
         }
     }
 

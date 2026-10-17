@@ -18,6 +18,7 @@ use nineteenninetyfour\socialimages\support\Catalog;
 use nineteenninetyfour\socialimages\support\InSite;
 use nineteenninetyfour\socialimages\support\RateLimits;
 use Throwable;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -96,7 +97,11 @@ class TemplatesController extends BaseController
         $title = trim((string) $this->request->getBodyParam('title'));
         $data['title'] = mb_substr($title, 0, 100) ?: ($data['title'] ?? Craft::t('social-images', 'New template'));
 
-        $template = $templates->save($templates->uniqueHandle($data['title']), $data);
+        try {
+            $template = $templates->save($templates->uniqueHandle($data['title']), $data);
+        } catch (InvalidTemplate $exception) {
+            return $this->asJson(['message' => $exception->getMessage()])->setStatusCode(422);
+        }
 
         return $this->asJson(['redirect' => UrlHelper::cpUrl('social-images/templates/'.$template->handle())]);
     }
@@ -111,7 +116,11 @@ class TemplatesController extends BaseController
         $data = $template->toArray();
         $data['title'] = Craft::t('social-images', '{title} (copy)', ['title' => $template->title()]);
 
-        $copy = $templates->save($templates->uniqueHandle($data['title']), $data);
+        try {
+            $copy = $templates->save($templates->uniqueHandle($data['title']), $data);
+        } catch (InvalidTemplate $exception) {
+            return $this->asJson(['message' => $exception->getMessage()])->setStatusCode(422);
+        }
 
         return $this->asJson(['redirect' => UrlHelper::cpUrl('social-images/templates/'.$copy->handle())]);
     }
@@ -186,6 +195,7 @@ class TemplatesController extends BaseController
 
     public function actionUpdate(string $handle): Response
     {
+        $this->requireUnsafeMethod();
         $this->requireAdminChanges();
 
         $this->designerTemplate($handle);
@@ -201,6 +211,7 @@ class TemplatesController extends BaseController
 
     public function actionDelete(string $handle): Response
     {
+        $this->requireUnsafeMethod();
         $this->requireAdminChanges();
 
         $this->designerTemplate($handle);
@@ -231,6 +242,13 @@ class TemplatesController extends BaseController
 
         $layout = Schema::layout((array) $this->request->getBodyParam('layout'));
         $entry = $this->entry($this->request->getBodyParam('entry'));
+
+        // People who can't edit templates see saved ones only (the Templates
+        // page's thumbnails): a layout of their own could point an image
+        // layer at any asset.
+        if (! $this->canManage() && ! $this->isSavedLayout($layout)) {
+            throw new ForbiddenHttpException('User is not authorized to perform this action.');
+        }
 
         return $this->asJson([
             'layout' => $layout,
@@ -354,6 +372,21 @@ class TemplatesController extends BaseController
         }
 
         return $entry;
+    }
+
+    protected function isSavedLayout(array $layout): bool
+    {
+        foreach (Plugin::getInstance()->templates->all() as $template) {
+            if ($template instanceof DesignerTemplate) {
+                foreach (array_keys($template->layouts()) as $handle) {
+                    if ($template->layout($handle) == $layout) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     protected function designerTemplate(string $handle): DesignerTemplate

@@ -4,6 +4,7 @@ namespace nineteenninetyfour\socialimages\tests\unit;
 
 use Craft;
 use craft\elements\Entry;
+use NineteenNinetyFour\SocialImages\Core\Rendering\Exceptions\RenderFailed;
 use nineteenninetyfour\socialimages\jobs\GenerateImage;
 
 class PipelineTest extends TestCase
@@ -22,7 +23,7 @@ class PipelineTest extends TestCase
         $this->assertTrue($card->exists());
         $this->assertMatchesRegularExpression('#^social-images/'.$entry->id.'/'.$entry->siteId.'/og-[a-f0-9]{12}\.png$#', $card->path());
         $this->assertCount(1, $this->camera->captures);
-        $this->assertStringContainsString('Hello world', $this->camera->captures[0]['html']);
+        $this->assertStringContainsString('Hello world', $this->pageData($this->camera->captures[0]['html']));
         $this->assertSame([1200, 630], [$this->camera->captures[0]['width'], $this->camera->captures[0]['height']]);
     }
 
@@ -135,5 +136,56 @@ class PipelineTest extends TestCase
     protected function fresh(Entry $entry): Entry
     {
         return Entry::find()->id($entry->id)->siteId($entry->siteId)->status(null)->one();
+    }
+
+    public function test_something_that_isnt_a_png_is_not_saved(): void
+    {
+        $this->template();
+        $this->useTemplate('basic', ['journal']);
+        $this->settings(['generateOnSave' => false]);
+        $entry = $this->entry();
+        $this->plugin()->set('camera', new class extends FakeCamera
+        {
+            public function capture(string $html, int $width, int $height): string
+            {
+                return 'not an image';
+            }
+        });
+
+        try {
+            $this->plugin()->cards->for($entry)->render();
+            $this->fail('Saved something that isn\'t a PNG.');
+        } catch (RenderFailed) {
+            $this->assertFalse($this->plugin()->cards->for($entry)->exists());
+        }
+    }
+
+    public function test_images_are_written_whole_and_remembered_as_there(): void
+    {
+        $this->template();
+        $this->useTemplate('basic', ['journal']);
+        $entry = $this->entry();
+        $this->runQueue();
+
+        $card = $this->plugin()->cards->for($entry);
+        $folder = CRAFT_ROOT_PATH.'/web/'.$card->folder();
+
+        $this->assertSame([basename($card->path())], array_values(array_diff(scandir($folder), ['.', '..'])));
+
+        // Gone behind the plugin's back: still known to be there until it's
+        // deleted through the plugin.
+        unlink(CRAFT_ROOT_PATH.'/web/'.$card->path());
+        $this->assertTrue($card->exists());
+        $this->plugin()->output->delete($card->path());
+        $this->assertFalse($card->exists());
+    }
+
+    public function test_an_entry_with_no_images_yet_lists_no_folder(): void
+    {
+        $this->template();
+        $this->useTemplate('basic', ['journal']);
+        $this->settings(['generateOnSave' => false]);
+
+        $this->assertSame([], $this->plugin()->cards->for($this->entry())->files());
     }
 }

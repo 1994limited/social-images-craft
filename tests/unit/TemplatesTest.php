@@ -84,7 +84,7 @@ class TemplatesTest extends TestCase
         $this->runQueue();
 
         $this->assertCount(1, $this->camera->captures);
-        $this->assertStringContainsString('Made!', $this->camera->captures[0]['html']);
+        $this->assertStringContainsString('Made!', $this->pageData($this->camera->captures[0]['html']));
         $this->assertFalse($this->plugin()->cards->for($never)->exists());
     }
 

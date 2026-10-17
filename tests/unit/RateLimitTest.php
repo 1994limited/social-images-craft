@@ -41,7 +41,8 @@ class RateLimitTest extends TestCase
         (new GenerateImage(['entryId' => $entry->id, 'siteId' => $entry->siteId]))->render();
 
         $this->assertGreaterThan(7000, (int) $this->queued()[0]['delay']);
-        $this->assertTrue(GenerateImage::recentlyFailed($this->plugin()->cards->for($entry)));
+        // Waiting, not failed.
+        $this->assertFalse(GenerateImage::recentlyFailed($this->plugin()->cards->for($entry)));
 
         $before = Craft::$app->getQueue()->getTotalJobs();
         $this->plugin()->cards->image($entry);
@@ -70,5 +71,21 @@ class RateLimitTest extends TestCase
 
         $this->expectException(RateLimited::class);
         (new GenerateImage(['entryId' => $entry->id, 'siteId' => $entry->siteId, 'attempt' => 2]))->render();
+    }
+
+    public function test_a_render_that_gives_up_is_marked_failed(): void
+    {
+        $this->template();
+        $this->useTemplate('basic', ['journal']);
+        $this->settings(['generateOnSave' => false]);
+        $entry = $this->entry();
+        $this->camera->failWith('Chrome crashed');
+
+        try {
+            (new GenerateImage(['entryId' => $entry->id, 'siteId' => $entry->siteId]))->render();
+        } catch (\RuntimeException) {
+        }
+
+        $this->assertTrue(GenerateImage::recentlyFailed($this->plugin()->cards->for($entry)));
     }
 }

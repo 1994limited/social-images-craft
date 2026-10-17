@@ -7,6 +7,7 @@ use craft\elements\User;
 use NineteenNinetyFour\SocialImages\Core\Rendering\Exceptions\QuotaExhausted;
 use NineteenNinetyFour\SocialImages\Core\Templates\Schema;
 use nineteenninetyfour\socialimages\Plugin;
+use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
@@ -166,7 +167,7 @@ class ControllersTest extends TestCase
         $response = $this->action('social-images/templates/thumbnail', ['handle' => 'basic'], 'GET');
 
         $this->assertStringStartsWith('sandbox allow-scripts', $response->headers->get('Content-Security-Policy'));
-        $this->assertStringContainsString('Your entry’s title shows here', $response->content);
+        $this->assertStringContainsString('Your entry’s title shows here', $this->pageData($response->content));
     }
 
     public function test_uploads_are_served_sandboxed_and_only_by_name(): void
@@ -226,5 +227,54 @@ class ControllersTest extends TestCase
 
         $this->assertTrue($data['ok']);
         $this->assertSame('fake', $data['driver']);
+    }
+
+    public function test_the_images_page_regenerates_with_ids_in_the_url(): void
+    {
+        $this->template();
+        $this->useTemplate('basic', ['journal']);
+        $this->settings(['generateOnSave' => false]);
+        $entry = $this->entry();
+        $this->actingAs();
+
+        $data = $this->json($this->action('social-images/images/regenerate', ['entryId' => $entry->id, 'siteId' => $entry->siteId, 'layout' => 'og']));
+
+        $this->assertStringContainsString('/social-images/'.$entry->id.'/'.$entry->siteId.'/og-', $data['url']);
+    }
+
+    public function test_templates_cant_be_deleted_over_get(): void
+    {
+        $this->template();
+        $this->actingAs();
+
+        try {
+            $this->expectException(BadRequestHttpException::class);
+            $this->action('social-images/templates/delete', ['handle' => 'basic'], 'GET');
+        } finally {
+            $this->assertNotNull($this->plugin()->templates->find('basic'));
+        }
+    }
+
+    public function test_viewers_preview_saved_layouts_only(): void
+    {
+        $template = $this->template();
+        $asset = $this->asset('private.png');
+        $this->actingAs([Plugin::PERMISSION_VIEW]);
+
+        $this->json($this->action('social-images/templates/preview', body: ['layout' => $template->layout('og')]));
+
+        $this->expectException(ForbiddenHttpException::class);
+        $this->action('social-images/templates/preview', body: ['layout' => Schema::layout(['layers' => [['id' => 'p', 'type' => 'image', 'source' => ['asset:'.$asset->id]]]])]);
+    }
+
+    public function test_a_long_title_still_makes_a_valid_handle(): void
+    {
+        $this->actingAs([Plugin::PERMISSION_MANAGE]);
+        $title = 'A remarkably long template title for testing handles';
+
+        $this->action('social-images/templates/store', body: ['title' => $title]);
+        $data = $this->json($this->action('social-images/templates/store', body: ['title' => $title]));
+
+        $this->assertMatchesRegularExpression('#/templates/[a-z0-9_]{1,40}$#', $data['redirect']);
     }
 }

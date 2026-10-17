@@ -42,7 +42,9 @@ class GenerateImage extends BaseJob
     {
         $hash = $card->hash();
 
-        if (self::recentlyFailed($card, $hash) || ! Craft::$app->getCache()->add(self::queuedKey($card->key(), $hash), true, 300)) {
+        // Remembered for as long as the job may wait, so page views meanwhile
+        // don't queue it again.
+        if (self::recentlyFailed($card, $hash) || ! Craft::$app->getCache()->add(self::queuedKey($card->key(), $hash), true, ($delay ?? 0) + 3600)) {
             return false;
         }
 
@@ -121,12 +123,15 @@ class GenerateImage extends BaseJob
             $path = $card->render();
         } catch (Throwable $exception) {
             $resetsAt = RateLimits::resetsAt($exception);
-            $cache->set(self::failureKey($card->key(), $card->hash()), true, $resetsAt ? max(60, $resetsAt->getTimestamp() - time()) : 300);
 
             // On the queue, a refusal waits as long as the service asked, or
-            // until the allowance resets, and tries again.
+            // until the allowance resets, and tries again. It's still queued,
+            // not failed, as far as pages and the control panel are concerned.
             if ($queued && RateLimits::caused($exception) && $this->attempt < Plugin::getInstance()->getSettings()->rateLimitAttempts) {
-                Craft::$app->getQueue()->delay($this->waitFor($exception, $resetsAt))->push(new self([
+                $wait = $this->waitFor($exception, $resetsAt);
+                $cache->set(self::queuedKey($card->key(), $card->hash()), true, $wait + 3600);
+
+                Craft::$app->getQueue()->delay($wait)->push(new self([
                     'entryId' => $this->entryId,
                     'siteId' => $this->siteId,
                     'layout' => $this->layout,
@@ -137,6 +142,8 @@ class GenerateImage extends BaseJob
 
                 return null;
             }
+
+            $cache->set(self::failureKey($card->key(), $card->hash()), true, $resetsAt ? max(60, $resetsAt->getTimestamp() - time()) : 300);
 
             throw $exception;
         }

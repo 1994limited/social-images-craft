@@ -125,7 +125,7 @@ class Templates extends Component implements TemplateStore
     public function uniqueHandle(string $title): string
     {
         $base = Schema::handle(Schema::slug($title)) ?? 'template';
-        $base = substr($base, 0, 50);
+        $base = substr($base, 0, 36);
         $handle = $base;
 
         for ($i = 2; $this->exists($handle); $i++) {

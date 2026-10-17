@@ -105,7 +105,8 @@ class ImagesController extends BaseController
     {
         $this->requirePostRequest();
 
-        $entry = $this->entry((int) $this->request->getRequiredBodyParam('entryId'), (int) $this->request->getRequiredBodyParam('siteId'), write: true);
+        // The Images page puts them in the URL, the field in the body.
+        $entry = $this->entry((int) $this->request->getParam('entryId'), (int) $this->request->getParam('siteId'), write: true);
         $layout = $this->layout();
         $cards = Plugin::getInstance()->cards;
 

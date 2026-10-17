@@ -176,7 +176,7 @@ class Plugin extends BasePlugin
      */
     public function renderers(): RendererManager
     {
-        return $this->renderers ??= new RendererManager($this->getSettings()->renderer);
+        return $this->renderers ??= new RendererManager($this->getSettings()->rendererConfig());
     }
 
     public function renderer(?string $driver = null): Renderer

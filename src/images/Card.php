@@ -5,6 +5,7 @@ namespace nineteenninetyfour\socialimages\images;
 use Craft;
 use craft\elements\Entry;
 use nineteenninetyfour\socialimages\base\Template;
+use NineteenNinetyFour\SocialImages\Core\Rendering\Exceptions\RenderFailed;
 use nineteenninetyfour\socialimages\integrations\Seomatic;
 use nineteenninetyfour\socialimages\Plugin;
 use nineteenninetyfour\socialimages\services\Output;
@@ -147,6 +148,10 @@ class Card
             $png = Plugin::getInstance()->camera->capture($this->template->html($this->entry, $this->layout), $size['width'], $size['height']);
         } finally {
             $cache->delete($this->renderingKey());
+        }
+
+        if (! str_starts_with($png, "\x89PNG\r\n\x1a\n")) {
+            throw new RenderFailed('The renderer returned something that isn’t a PNG.');
         }
 
         // One render at a time replaces this layout's files, and none

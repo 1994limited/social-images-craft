@@ -3,6 +3,7 @@
 namespace nineteenninetyfour\socialimages\tests\unit;
 
 use Craft;
+use nineteenninetyfour\socialimages\models\Settings;
 
 class SettingsTest extends TestCase
 {
@@ -36,5 +37,22 @@ class SettingsTest extends TestCase
 
         $this->useTemplate('basic', ['journal'], sites: [$site->uid]);
         $this->assertSame('basic', $this->plugin()->cards->templateFor($this->entry())->handle());
+    }
+
+    public function test_env_settings_fill_in_whatever_the_config_leaves_out(): void
+    {
+        putenv('CLOUDFLARE_API_TOKEN=from-env');
+        $_SERVER['CLOUDFLARE_API_TOKEN'] = 'from-env';
+
+        try {
+            $settings = new Settings(['renderer' => ['driver' => 'cloudflare']]);
+            $config = $settings->rendererConfig();
+
+            $this->assertSame('cloudflare', $config['driver']);
+            $this->assertSame('from-env', $config['drivers']['cloudflare']['api_token']);
+        } finally {
+            putenv('CLOUDFLARE_API_TOKEN');
+            unset($_SERVER['CLOUDFLARE_API_TOKEN']);
+        }
     }
 }

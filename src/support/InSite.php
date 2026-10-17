@@ -22,19 +22,21 @@ class InSite
         $site = $entry->getSite();
         $previousSite = $sites->getCurrentSite();
         $previousLanguage = Craft::$app->language;
-
-        if ($site->id === $previousSite->id && $site->language === $previousLanguage) {
-            return $callback();
-        }
+        // Made once per request in the request's language, so it's swapped
+        // too: otherwise dates (and so fingerprints) would differ between
+        // the control panel, the queue and the site.
+        $previousFormatter = Craft::$app->getFormatter();
 
         $sites->setCurrentSite($site);
         Craft::$app->language = $site->language;
+        Craft::$app->set('formatter', Craft::$app->getI18n()->getLocaleById($site->language)->getFormatter());
 
         try {
             return $callback();
         } finally {
             $sites->setCurrentSite($previousSite);
             Craft::$app->language = $previousLanguage;
+            Craft::$app->set('formatter', $previousFormatter);
         }
     }
 }

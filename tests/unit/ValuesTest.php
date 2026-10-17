@@ -72,10 +72,35 @@ class ValuesTest extends TestCase
                 'layouts' => ['og' => ['layers' => [['id' => 't', 'type' => 'text', 'text' => '{date:j F Y}']]]],
             ])->html($entry, 'og');
 
-            $this->assertStringContainsString('2 octobre 2026', $html);
+            $this->assertStringContainsString('2 octobre 2026', $this->pageData($html));
             $this->assertSame('en', substr(Craft::$app->language, 0, 2));
         } finally {
             $site->language = $language;
+        }
+    }
+
+    public function test_the_fingerprint_is_the_same_whatever_language_the_request_is_in(): void
+    {
+        $this->template(layers: [['id' => 't', 'type' => 'text', 'text' => '{date}']]);
+        $this->useTemplate('basic', ['journal']);
+        $this->settings(['generateOnSave' => false]);
+        $entry = $this->entry();
+        $site = $entry->getSite();
+        $language = $site->language;
+        $site->language = 'de-DE';
+
+        try {
+            $german = $this->plugin()->cards->for($entry)->hash();
+
+            Craft::$app->set('formatter', Craft::$app->getI18n()->getLocaleById('en-GB')->getFormatter());
+            $this->assertSame($german, $this->plugin()->cards->for($entry)->hash());
+
+            Craft::$app->set('formatter', Craft::$app->getI18n()->getLocaleById('fr-FR')->getFormatter());
+            $this->assertSame($german, $this->plugin()->cards->for($entry)->hash());
+            $this->assertStringContainsString('Oktober', $this->pageData($this->plugin()->templates->designer('basic')->html($entry, 'og')));
+        } finally {
+            $site->language = $language;
+            Craft::$app->set('formatter', Craft::$app->getI18n()->getLocaleById('en-GB')->getFormatter());
         }
     }
 }
